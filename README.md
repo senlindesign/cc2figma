@@ -4,27 +4,41 @@
 [![Figma MCP](https://img.shields.io/badge/Figma-MCP%20Server-ff7262?style=flat-square&logo=figma)](https://www.npmjs.com/package/@anthropic-ai/figma-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-**A set of Claude Code Skills that make AI build Figma designs following your Design System — components linked to masters, visual values bound to tokens, zero hardcoded values.**
+Design System compliance for AI-generated Figma designs. 5 skills, 7 preflight checks, zero raw values.
+
+> **Quick start:** Clone, copy skills to `.claude/skills/`, paste your Figma URL into `CLAUDE.md`, say "let's start". [Full install guide below.](#installation)
 
 [Chinese / 中文版](README.zh-CN.md)
 
 ---
 
+## Why?
+
+AI can write to Figma now. But without guidance, it builds everything from scratch — hardcoded hex colors, arbitrary font sizes, raw spacing values. The result looks right but is completely disconnected from your Design System. Every color is a magic number. Every component is a one-off. Your design tokens might as well not exist.
+
+cc2figma fixes this with 5 Claude Code Skills that enforce Design System compliance at every step:
+
+- Components are Instances of your Master Components, not rebuilt from scratch
+- Colors, fonts, spacing, and radii bind to Variables and Styles, not raw values
+- Every write to Figma is automatically verified for token compliance
+
+---
+
 ## Before & After
 
-### Without Skills — Hardcoded values, no bindings
+### Without Skills
 
 <!-- Replace with actual screenshot -->
 ![Without Skills](assets/without-skills.png)
 
-> Components built from scratch. Colors, fonts, and spacing are raw values with no Design System connection.
+> Hardcoded colors, arbitrary spacing, components built from scratch. Looks right, but zero Design System connection.
 
-### With Skills — Component links, token bindings
+### With Skills
 
 <!-- Replace with actual screenshot -->
 ![With Skills](assets/with-skills.png)
 
-> Components are Instances of Master Components. All colors, fonts, spacing, and radii are bound to Design System Variables and Styles.
+> Master Component Instances. All visual values bound to Design System Variables and Styles.
 
 ---
 
@@ -35,20 +49,68 @@ Before every design session, 7 automated checks ensure everything is connected:
 <!-- Replace with actual screenshot -->
 ![Preflight Status](assets/preflight-status.png)
 
+MCP connection, file access, connected libraries, local styles, variables, and components — all verified before a single node is created.
+
 ---
 
-## What It Does
+## Usage Examples
 
-- **One-click preflight** — Verifies MCP connection, loads complete Styles / Variables / Components inventory
-- **Components first** — Searches the Design System and creates Instances of Master Components
-- **Token-bound design** — Colors, fonts, spacing, and radii always bind to Variables / Styles — no hardcoded values
-- **Auto QA** — Verifies style/variable bindings on every node after each Figma write
-- **Reference interpreter** — Give it a screenshot or URL, get a structured Design Brief
+Say "let's start" to run preflight, then describe what you want:
+
+    You: Build a login page with email and password fields
+    Claude: [searches DS for Form, Input, Button components]
+            [creates Instances, binds all tokens]
+            [takes screenshot for verification]
+
+    You: Add a registration form next to it with a confirm password field
+    Claude: [reuses same DS components, adds new section]
+            [QA verifies all bindings automatically]
+
+    You: Here's a screenshot of the dashboard we need
+    Claude: [analyzes reference, outputs structured Design Brief]
+            [builds section by section, verifying after each step]
+
+Every interaction follows the same loop: **search DS** → **create Instances** → **bind tokens** → **verify**.
+
+---
+
+## What's Included
+
+### 5 Skills
+
+| Skill | Trigger | What it does |
+| ----- | ------- | ------------ |
+| `figma-preflight` | "let's start", first Figma URL | 7 checks + loads Token Map + Component Registry |
+| `component-rules` | Any UI construction task | Library-first lookup, Auto Layout, semantic naming |
+| `figma-style-binding` | Any color, font, or spacing operation | Enforce Variable / Style binding on all visual values |
+| `figma-qa-verifier` | Auto-triggers after every Figma write | Check all nodes for raw values, report violations |
+| `reference-interpreter` | Share screenshot, URL, or description | Output structured Design Brief before building |
+
+### How They Work Together
+
+```
+"let's start"
+    |
+    v
+ preflight ── verify connection, load tokens + components
+    |
+    v
+ component-rules ──> figma-style-binding
+ find & instantiate     bind every visual
+ DS components          value to a token
+    |                       |
+    v                       v
+         figma-qa-verifier
+         verify all bindings,
+         flag any raw values
+```
+
+---
 
 ## Good For / Not For
 
 | Good For | Not For |
-|----------|---------|
+| -------- | ------- |
 | Building pages from an existing Design System | Creating a Design System from scratch |
 | Describing UI in natural language, Claude builds it in Figma | Pixel-perfect illustration or icon drawing |
 | Working in a DS file or a file with a linked DS library | Free-form design without a Design System |
@@ -82,13 +144,13 @@ cp cc2figma/CLAUDE.md.template your-project/CLAUDE.md
 
 ### Configure CLAUDE.md
 
-Open `CLAUDE.md` and fill in your Figma file details:
+Open `CLAUDE.md` and paste your Figma file URL:
 
 ```markdown
 # Figma Design Project
 
 - **Figma file:** <https://www.figma.com/design/YOUR_FILE_KEY/...>
-- **Fonts:** Inter (primary) · Roboto Mono (code)
+- **Fonts:** [leave blank — Preflight auto-detects from your DS]
 - **Session goal:** [what are we designing today?]
 
 ## Rules
@@ -98,66 +160,16 @@ Open `CLAUDE.md` and fill in your Figma file details:
 3. Never start designing before the Design Brief is confirmed.
 ```
 
-> The Fonts field can be left blank — Preflight will auto-populate it from Design System Variables.
-
----
-
-## Workflow
-
-```
-1. Open Claude Code in your project directory
-2. Say "Let's start"                          → triggers Preflight
-3. Wait for all 7 checks to pass              → Styles / Variables / Components loaded
-4. Describe the design                        → "Build a login page with email and password"
-5. Claude searches DS components → creates Instances → binds Tokens
-6. Screenshot verification after each step     → confirm and continue
-7. Result: Figma design with 100% token binding and proper component links
-```
-
----
-
-## Skills Reference
-
-| Skill | Trigger | Responsibility |
-|-------|---------|---------------|
-| `figma-preflight` | "let's start", first Figma URL shared | 7 checks + Token Map + Component Registry |
-| `component-rules` | "create a card", "build a button", any UI construction | Library-first lookup, Auto Layout, semantic naming |
-| `figma-style-binding` | Any color, font, or spacing operation | Enforce Variable / Style binding on all visual values |
-| `figma-qa-verifier` | Auto-triggers after every `use_figma` call | Check binding status, report raw values |
-| `reference-interpreter` | Share screenshot, URL, or design description | Output structured Design Brief |
-
-### How They Work Together
-
-```
-Session start
-    |
-    v
-+-----------------+
-|  figma-preflight | <-- Load Token Map + Component Registry
-+--------+--------+
-         |
-         v
-+-----------------+     +---------------------+
-| component-rules  | --> |  figma-style-binding |
-| Find components, |     |  Bind colors/fonts/  |
-| build structure  |     |  spacing to tokens   |
-+--------+--------+     +----------+----------+
-         |                        |
-         v                        v
-    +-------------------------------------+
-    |       figma-qa-verifier             |
-    |  Verify Style/Variable bindings     |
-    +-------------------------------------+
-```
+Then say "let's start" in Claude Code. Preflight handles the rest.
 
 ---
 
 ## Supported Scenarios
 
 | Scenario | How It Works |
-|----------|-------------|
+| -------- | ------------ |
 | **Working in a DS file directly** | Preflight reads all local Styles, Variables, and Components. Full token binding. |
-| **New file with a linked DS library** | Instances imported via `importComponentByKeyAsync` inherit all token bindings from the master component automatically. Library variables can be imported via `importVariableByKeyAsync` for new frames. |
+| **New file with a linked DS library** | Component Instances inherit all token bindings from masters automatically. Library variables can be imported for new frames. |
 
 ---
 
@@ -169,42 +181,29 @@ your-project/
 └── .claude/
     ├── settings.json                  # Permissions + QA Hook
     └── skills/
-        ├── figma-preflight/
-        │   └── SKILL.md               # 7 checks + Token Map + Component Registry
-        ├── component-rules/
-        │   └── SKILL.md               # Component build rules (Library-first, Auto Layout, naming)
-        ├── figma-style-binding/
-        │   └── SKILL.md               # Style binding rules (Color / Text / Spacing)
-        ├── figma-qa-verifier/
-        │   └── SKILL.md               # QA verification rules
-        └── reference-interpreter/
-            └── SKILL.md               # Reference → Design Brief
+        ├── figma-preflight/           # 7 checks + Token Map + Component Registry
+        ├── component-rules/           # Library-first, Auto Layout, naming
+        ├── figma-style-binding/       # Color / Text / Spacing binding
+        ├── figma-qa-verifier/         # Post-write verification
+        └── reference-interpreter/     # Reference → Design Brief
 ```
 
 ---
 
-## Core Principles
-
-1. **Components first** — Search the Design System before building from scratch
-2. **Token-bound** — All visual values must bind to a Variable or Style, no hardcoded values
-3. **Incremental** — Build one section at a time, verify with screenshot before continuing
-4. **Semantic naming** — Every node uses `"Section / Role"` format
-5. **Transparent QA** — Every operation returns node IDs, bindings are verified automatically
-
 ## Known Limitations
 
-| Limitation | Details | Workaround |
-|------------|---------|------------|
-| Nested instance modification | Doubly-nested Instances can't be directly modified | `detachInstance()` on the outer instance first |
-| Library variables not enumerable | `getLocalVariablesAsync()` can't see library variables | Instances inherit tokens automatically; use `importVariableByKeyAsync` for new frames |
-| Variant property values | Invalid values in `setProperties` roll back the entire atomic script | Read `componentPropertyDefinitions` to confirm valid values first |
+| Limitation | Workaround |
+| ---------- | ---------- |
+| Doubly-nested Instances can't be directly modified | `detachInstance()` on the outer instance first |
+| `getLocalVariablesAsync()` can't see library variables | Instances inherit tokens automatically; use `importVariableByKeyAsync` for new frames |
+| Invalid variant values in `setProperties` roll back the entire script | Read `componentPropertyDefinitions` to confirm valid values first |
 
 ---
 
 ## Contributing
 
-Issues and PRs are welcome. If you have a Figma design workflow that could benefit from a new Skill, please describe it in an Issue.
+Issues and PRs are welcome. If you have a Figma design workflow that could benefit from a new Skill, describe it in an Issue.
 
-## License
+---
 
 MIT © 2025 Sen Lin

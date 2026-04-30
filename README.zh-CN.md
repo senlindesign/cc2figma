@@ -4,27 +4,41 @@
 [![Figma MCP](https://img.shields.io/badge/Figma-MCP%20Server-ff7262?style=flat-square&logo=figma)](https://www.npmjs.com/package/@anthropic-ai/figma-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-**一组 Claude Code Skills，让 AI 在 Figma 里按照 Design System 的规范构建设计——组件绑定 Master Component，视觉值绑定 Token，零裸值。**
+让 AI 生成的 Figma 设计 100% 符合 Design System 规范。5 个 Skills，7 项预检，零裸值。
+
+> **快速开始：** 克隆仓库，将 skills 复制到 `.claude/skills/`，在 `CLAUDE.md` 中填入 Figma URL，说 "let's start"。[完整安装指南见下方。](#安装)
 
 [English Version](README.md)
 
 ---
 
+## 为什么需要它？
+
+AI 现在可以直接写入 Figma。但如果没有引导，它会从零构建一切——硬编码的十六进制颜色、随意的字号、裸数值的间距。结果看起来没问题，但和你的 Design System 完全脱节。每个颜色都是一个 magic number，每个组件都是一次性的。你的 Design Token 形同虚设。
+
+cc2figma 用 5 个 Claude Code Skills 在每一步强制 Design System 合规：
+
+- 组件是 Master Component 的 Instance，不是从零搭建
+- 颜色、字体、间距、圆角全部绑定 Variable 和 Style，不允许裸值
+- 每次写入 Figma 后自动验证 Token 绑定状态
+
+---
+
 ## 效果对比
 
-### Without Skills — 裸值、无绑定
+### Without Skills
 
 <!-- 替换为实际截图 -->
 ![Without Skills](assets/without-skills.png)
 
-> 组件从零构建，颜色/字体/间距是硬编码的数值，与 Design System 无关联。
+> 硬编码颜色、随意间距、从零构建的组件。看起来对，但与 Design System 零关联。
 
-### With Skills — 组件链接、Token 绑定
+### With Skills
 
 <!-- 替换为实际截图 -->
 ![With Skills](assets/with-skills.png)
 
-> 组件是 Master Component 的 Instance，所有颜色、字体、间距、圆角都绑定了 Design System 的 Variable 和 Style。
+> Master Component 的 Instance。所有视觉值绑定 Design System 的 Variable 和 Style。
 
 ---
 
@@ -35,15 +49,63 @@
 <!-- 替换为实际截图 -->
 ![Preflight Status](assets/preflight-status.png)
 
+MCP 连接、文件权限、已链接 Library、本地 Style、Variable、Component——全部在创建第一个节点之前验证完毕。
+
 ---
 
-## 它能做什么
+## 使用示例
 
-- **一键预检** — 验证 MCP 连接，加载 Styles / Variables / Components 完整清单
-- **组件优先** — 从 Design System 查找并复用组件，创建的都是 Master Component 的 Instance
-- **Token 强绑定** — 颜色、字体、间距、圆角全部绑定 Variable / Style，禁止裸值
-- **自动 QA** — 每次写入 Figma 后自动检查所有节点的绑定状态
-- **参考解读** — 给一张截图或 URL，输出结构化 Design Brief
+说 "let's start" 运行预检，然后描述你想要的设计：
+
+    你：做一个登录页，包含邮箱和密码输入框
+    Claude：[查找 DS 中的 Form、Input、Button 组件]
+            [创建 Instance，绑定所有 Token]
+            [截图验证]
+
+    你：旁边加一个注册表单，多一个确认密码字段
+    Claude：[复用相同 DS 组件，新增 section]
+            [QA 自动验证所有绑定]
+
+    你：这是我们需要做的 Dashboard 截图
+    Claude：[分析参考图，输出结构化 Design Brief]
+            [逐个 section 构建，每步验证]
+
+每次交互都遵循相同循环：**查找 DS** → **创建 Instance** → **绑定 Token** → **验证**。
+
+---
+
+## 包含内容
+
+### 5 个 Skills
+
+| Skill | 触发条件 | 职责 |
+| ----- | -------- | ---- |
+| `figma-preflight` | "let's start"、首次分享 Figma URL | 7 项预检 + 加载 Token Map + Component Registry |
+| `component-rules` | 任何 UI 构建任务 | 组件库优先查找、Auto Layout、语义化命名 |
+| `figma-style-binding` | 设置颜色、字体、间距 | 强制所有视觉值绑定 Variable / Style |
+| `figma-qa-verifier` | 每次写入 Figma 后自动触发 | 检查所有节点的裸值，报告违规 |
+| `reference-interpreter` | 分享截图 / URL / 设计描述 | 构建前输出结构化 Design Brief |
+
+### 它们如何协作
+
+```
+"let's start"
+    |
+    v
+ preflight ── 验证连接，加载 Token + 组件清单
+    |
+    v
+ component-rules ──> figma-style-binding
+ 查找并实例化          将每个视觉值
+ DS 组件               绑定到 Token
+    |                       |
+    v                       v
+         figma-qa-verifier
+         验证所有绑定，
+         标记裸值
+```
+
+---
 
 ## 适合 / 不适合
 
@@ -82,13 +144,13 @@ cp cc2figma/CLAUDE.md.template your-project/CLAUDE.md
 
 ### 配置 CLAUDE.md
 
-打开 `CLAUDE.md`，填入你的 Figma 文件信息：
+打开 `CLAUDE.md`，粘贴你的 Figma 文件 URL：
 
 ```markdown
 # Figma Design Project
 
 - **Figma file:** <https://www.figma.com/design/YOUR_FILE_KEY/...>
-- **Fonts:** Inter (primary) · Roboto Mono (code)
+- **Fonts:** [留空——Preflight 会自动从 DS 中检测]
 - **Session goal:** [今天要设计什么？]
 
 ## Rules
@@ -98,56 +160,7 @@ cp cc2figma/CLAUDE.md.template your-project/CLAUDE.md
 3. Never start designing before the Design Brief is confirmed.
 ```
 
-> Fonts 字段可以留空——Preflight 会自动从 Design System 的 Variable 中读取并填充。
-
----
-
-## 使用流程
-
-```
-1. 打开 Claude Code，进入你的项目目录
-2. 说 "Let's start" 或 "开始"               → 触发 Preflight 预检
-3. 等待 7 项检查全部通过                      → Styles / Variables / Components 已加载
-4. 描述想要的设计                             → "做一个登录页，包含邮箱和密码输入框"
-5. Claude 查找 DS 组件 → 创建 Instance → 绑定 Token
-6. 每步完成后截图验证                          → 确认后继续下一个 section
-7. 最终产出：100% Token 绑定、组件链接完整的 Figma 设计
-```
-
----
-
-## Skills 一览
-
-| Skill | 触发条件 | 职责 |
-| ----- | -------- | ---- |
-| `figma-preflight` | "let's start"、首次分享 Figma URL | 7 项预检 + Token Map + Component Registry |
-| `component-rules` | "创建 card"、"做一个按钮"、构建 UI | 组件库优先查找、Auto Layout、语义化命名 |
-| `figma-style-binding` | 设置颜色、字体、间距 | 强制所有视觉值绑定 Style 或 Variable |
-| `figma-qa-verifier` | 每次 `use_figma` 后自动触发 | 检查节点绑定状态，报告裸值 |
-| `reference-interpreter` | 分享截图 / URL / 设计描述 | 输出结构化 Design Brief |
-
-### 它们如何协作
-
-```
-Session start
-    |
-    v
-+-----------------+
-|  figma-preflight | <-- 加载 Token Map + Component Registry
-+--------+--------+
-         |
-         v
-+-----------------+     +---------------------+
-| component-rules  | --> |  figma-style-binding |
-| 查找组件、搭结构  |     |  绑定颜色/字体/间距    |
-+--------+--------+     +----------+----------+
-         |                        |
-         v                        v
-    +-------------------------------------+
-    |       figma-qa-verifier             |
-    |  检查所有节点的 Style/Variable 绑定    |
-    +-------------------------------------+
-```
+然后在 Claude Code 中说 "let's start"。Preflight 会处理剩下的一切。
 
 ---
 
@@ -156,7 +169,7 @@ Session start
 | 场景 | 工作原理 |
 | ---- | -------- |
 | **直接在 DS 文件中工作** | Preflight 读取所有本地 Styles、Variables 和 Components，完整 Token 绑定。 |
-| **新文件链接了 DS Library** | 通过 `importComponentByKeyAsync` 导入的 Instance 自动继承 Master Component 的所有 Token 绑定。新建 frame 可通过 `importVariableByKeyAsync` 导入 Library 变量。 |
+| **新文件链接了 DS Library** | 组件 Instance 自动继承 Master Component 的所有 Token 绑定。新建 frame 可导入 Library 变量。 |
 
 ---
 
@@ -168,35 +181,22 @@ your-project/
 └── .claude/
     ├── settings.json                  # 权限 + QA Hook
     └── skills/
-        ├── figma-preflight/
-        │   └── SKILL.md               # 7 项预检 + Token Map + Component Registry
-        ├── component-rules/
-        │   └── SKILL.md               # 组件构建规则（Library-first、Auto Layout、命名）
-        ├── figma-style-binding/
-        │   └── SKILL.md               # 样式绑定规则（Color / Text / Spacing）
-        ├── figma-qa-verifier/
-        │   └── SKILL.md               # QA 验证规则
-        └── reference-interpreter/
-            └── SKILL.md               # 参考解读 → Design Brief
+        ├── figma-preflight/           # 7 项预检 + Token Map + Component Registry
+        ├── component-rules/           # 组件库优先、Auto Layout、命名
+        ├── figma-style-binding/       # 颜色 / 字体 / 间距绑定
+        ├── figma-qa-verifier/         # 写入后验证
+        └── reference-interpreter/     # 参考解读 → Design Brief
 ```
 
 ---
 
-## 核心原则
-
-1. **组件优先** — 先查 Design System，找不到才从零构建
-2. **Token 强绑定** — 所有视觉值必须绑定 Variable 或 Style，不允许裸值
-3. **增量构建** — 一次一个 section，截图验证后再继续
-4. **语义命名** — 每个节点使用 `"Section / Role"` 格式
-5. **透明 QA** — 每次操作返回节点 ID，自动验证绑定状态
-
 ## 已知限制
 
-| 限制 | 说明 | 应对 |
-| ---- | ---- | ---- |
-| 嵌套实例修改 | 双重嵌套 Instance 无法直接修改内部属性 | 先 `detachInstance()` 外层 |
-| Library 变量不可枚举 | `getLocalVariablesAsync()` 看不到 Library 变量 | Instance 自动继承 Token；新建 frame 用 `importVariableByKeyAsync` |
-| Variant 属性值 | `setProperties` 传入无效值会回滚整个脚本 | 先读 `componentPropertyDefinitions` 确认有效值 |
+| 限制 | 应对 |
+| ---- | ---- |
+| 双重嵌套 Instance 无法直接修改内部属性 | 先 `detachInstance()` 外层 |
+| `getLocalVariablesAsync()` 看不到 Library 变量 | Instance 自动继承 Token；新建 frame 用 `importVariableByKeyAsync` |
+| `setProperties` 传入无效 Variant 值会回滚整个脚本 | 先读 `componentPropertyDefinitions` 确认有效值 |
 
 ---
 
@@ -204,6 +204,6 @@ your-project/
 
 欢迎提交 Issue 和 PR。如果你有新的 Figma 设计场景需要 Skill 支持，请在 Issue 中描述你的工作流程。
 
-## License
+---
 
 MIT © 2025 Sen Lin
