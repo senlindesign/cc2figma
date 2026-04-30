@@ -1,0 +1,11 @@
+# Figma Design Project
+
+- **Figma file:** <https://www.figma.com/design/YOUR_FILE_KEY/...>
+- **Fonts:** [leave blank — Preflight will auto-populate from Design System Variables]
+- **Session goal:** [what are we designing today?]
+
+## Rules
+
+1. Every visual value must bind to a Style or Variable. Never hardcode colors, font sizes, or spacing.
+2. Always search connected libraries before building any component from scratch.
+3. Never start designing before the Design Brief is confirmed.

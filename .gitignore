@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Claude Code session data (not for sharing)
+.claude/projects/
+.claude/memory/
+.claude/scheduled_tasks.json
+
+# Project-specific CLAUDE.md (users create their own from template)
+CLAUDE.md
