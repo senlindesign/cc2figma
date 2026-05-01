@@ -26,19 +26,10 @@ cc2figma 用 5 个 Claude Code Skills 在每一步强制 Design System 合规：
 
 ## 效果对比
 
-### Without Skills
+![With Skills vs Without Skills](assets/before-after.png)
 
-<!-- 替换为实际截图 -->
-![Without Skills](assets/without-skills.png)
-
-> 硬编码颜色、随意间距、从零构建的组件。看起来对，但与 Design System 零关联。
-
-### With Skills
-
-<!-- 替换为实际截图 -->
-![With Skills](assets/with-skills.png)
-
-> Master Component 的 Instance。所有视觉值绑定 Design System 的 Variable 和 Style。
+> **With Skills：** Master Component 的 Instance，所有视觉值绑定 Design System 的 Variable 和 Style。
+> **Without Skills：** 硬编码颜色、随意间距、从零构建的组件——看起来对，但与 Design System 零关联。
 
 ---
 
@@ -46,7 +37,6 @@ cc2figma 用 5 个 Claude Code Skills 在每一步强制 Design System 合规：
 
 每次设计会话开始前，自动执行 7 项检查，确保一切连接就绪：
 
-<!-- 替换为实际截图 -->
 ![Preflight Status](assets/preflight-status.png)
 
 MCP 连接、文件权限、已链接 Library、本地 Style、Variable、Component——全部在创建第一个节点之前验证完毕。

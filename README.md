@@ -26,19 +26,10 @@ cc2figma fixes this with 5 Claude Code Skills that enforce Design System complia
 
 ## Before & After
 
-### Without Skills
+![With Skills vs Without Skills](assets/before-after.png)
 
-<!-- Replace with actual screenshot -->
-![Without Skills](assets/without-skills.png)
-
-> Hardcoded colors, arbitrary spacing, components built from scratch. Looks right, but zero Design System connection.
-
-### With Skills
-
-<!-- Replace with actual screenshot -->
-![With Skills](assets/with-skills.png)
-
-> Master Component Instances. All visual values bound to Design System Variables and Styles.
+> **With Skills:** Master Component Instances, all visual values bound to Design System Variables and Styles.
+> **Without Skills:** Hardcoded colors, arbitrary spacing, components built from scratch — looks right, but zero Design System connection.
 
 ---
 
@@ -46,7 +37,6 @@ cc2figma fixes this with 5 Claude Code Skills that enforce Design System complia
 
 Before every design session, 7 automated checks ensure everything is connected:
 
-<!-- Replace with actual screenshot -->
 ![Preflight Status](assets/preflight-status.png)
 
 MCP connection, file access, connected libraries, local styles, variables, and components — all verified before a single node is created.
