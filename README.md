@@ -80,12 +80,17 @@ Every interaction follows the same loop: **search DS** → **create Instances** 
     "let's start"
         |
         v
-     preflight ── verify connection, load tokens + components
+    ① preflight ─── one-time setup, load Token Map + Component Registry
         |
         v
-     component-rules ──> figma-style-binding
-     find & instantiate     bind every visual value
-     DS components          to a token, then verify
+    ② reference-interpreter ─── optional: screenshot / reference → Design Brief → user confirms
+        |
+        v
+    ┌→ ③ component-rules ─── search Library, use Instances
+    │       |
+    │  ④ figma-style-binding ─── bind every value to a token, then auto-verify
+    │       |
+    └── next section (loop until done)
 
 ---
 
