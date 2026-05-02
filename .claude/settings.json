@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'QA REMINDER: If nodes were created or modified, verify style/variable bindings. Load figma-qa-verifier and check all returned node IDs.'"
+            "command": "echo 'QA: Verify style/variable bindings on all returned node IDs.'"
           }
         ]
       }

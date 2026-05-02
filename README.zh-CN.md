@@ -4,7 +4,7 @@
 [![Figma MCP](https://img.shields.io/badge/Figma-MCP%20Server-ff7262?style=flat-square&logo=figma)](https://www.npmjs.com/package/@anthropic-ai/figma-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-让 AI 生成的 Figma 设计 100% 符合 Design System 规范。5 个 Skills，7 项预检，零裸值。
+让 AI 生成的 Figma 设计 100% 符合 Design System 规范。4 个 Skills，3 步预检，零裸值。
 
 > **快速开始：** 克隆仓库，将 skills 复制到 `.claude/skills/`，在 `CLAUDE.md` 中填入 Figma URL，说 "let's start"。[完整安装指南见下方。](#安装)
 
@@ -16,7 +16,7 @@
 
 AI 现在可以直接写入 Figma。但如果没有引导，它会从零构建一切——硬编码的十六进制颜色、随意的字号、裸数值的间距。结果看起来没问题，但和你的 Design System 完全脱节。每个颜色都是一个 magic number，每个组件都是一次性的。你的 Design Token 形同虚设。
 
-cc2figma 用 5 个 Claude Code Skills 在每一步强制 Design System 合规：
+cc2figma 用 4 个 Claude Code Skills 在每一步强制 Design System 合规：
 
 - 组件是 Master Component 的 Instance，不是从零搭建
 - 颜色、字体、间距、圆角全部绑定 Variable 和 Style，不允许裸值
@@ -66,34 +66,26 @@ MCP 连接、文件权限、已链接 Library、本地 Style、Variable、Compon
 
 ## 包含内容
 
-### 5 个 Skills
+### 4 个 Skills
 
 | Skill | 触发条件 | 职责 |
 | ----- | -------- | ---- |
-| `figma-preflight` | "let's start"、首次分享 Figma URL | 7 项预检 + 加载 Token Map + Component Registry |
+| `figma-preflight` | "let's start"、首次分享 Figma URL | 3 步并行预检 + Token Map + Component Registry |
 | `component-rules` | 任何 UI 构建任务 | 组件库优先查找、Auto Layout、语义化命名 |
-| `figma-style-binding` | 设置颜色、字体、间距 | 强制所有视觉值绑定 Variable / Style |
-| `figma-qa-verifier` | 每次写入 Figma 后自动触发 | 检查所有节点的裸值，报告违规 |
+| `figma-style-binding` | 设置颜色、字体、间距 | 强制所有视觉值绑定 Variable / Style + 写入后 QA 验证 |
 | `reference-interpreter` | 分享截图 / URL / 设计描述 | 构建前输出结构化 Design Brief |
 
 ### 它们如何协作
 
-```
-"let's start"
-    |
-    v
- preflight ── 验证连接，加载 Token + 组件清单
-    |
-    v
- component-rules ──> figma-style-binding
- 查找并实例化          将每个视觉值
- DS 组件               绑定到 Token
-    |                       |
-    v                       v
-         figma-qa-verifier
-         验证所有绑定，
-         标记裸值
-```
+    "let's start"
+        |
+        v
+     preflight ── 验证连接，加载 Token + 组件清单
+        |
+        v
+     component-rules ──> figma-style-binding
+     查找并实例化          将每个视觉值绑定到 Token，
+     DS 组件               然后自动验证绑定状态
 
 ---
 
@@ -171,10 +163,9 @@ your-project/
 └── .claude/
     ├── settings.json                  # 权限 + QA Hook
     └── skills/
-        ├── figma-preflight/           # 7 项预检 + Token Map + Component Registry
+        ├── figma-preflight/           # 3 步并行预检 + Token Map + Component Registry
         ├── component-rules/           # 组件库优先、Auto Layout、命名
-        ├── figma-style-binding/       # 颜色 / 字体 / 间距绑定
-        ├── figma-qa-verifier/         # 写入后验证
+        ├── figma-style-binding/       # 颜色 / 字体 / 间距绑定 + QA 验证
         └── reference-interpreter/     # 参考解读 → Design Brief
 ```
 

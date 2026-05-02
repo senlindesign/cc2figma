@@ -4,7 +4,7 @@
 [![Figma MCP](https://img.shields.io/badge/Figma-MCP%20Server-ff7262?style=flat-square&logo=figma)](https://www.npmjs.com/package/@anthropic-ai/figma-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-Design System compliance for AI-generated Figma designs. 5 skills, 7 preflight checks, zero raw values.
+Design System compliance for AI-generated Figma designs. 4 skills, 3-step preflight, zero raw values.
 
 > **Quick start:** Clone, copy skills to `.claude/skills/`, paste your Figma URL into `CLAUDE.md`, say "let's start". [Full install guide below.](#installation)
 
@@ -16,7 +16,7 @@ Design System compliance for AI-generated Figma designs. 5 skills, 7 preflight c
 
 AI can write to Figma now. But without guidance, it builds everything from scratch — hardcoded hex colors, arbitrary font sizes, raw spacing values. The result looks right but is completely disconnected from your Design System. Every color is a magic number. Every component is a one-off. Your design tokens might as well not exist.
 
-cc2figma fixes this with 5 Claude Code Skills that enforce Design System compliance at every step:
+cc2figma fixes this with 4 Claude Code Skills that enforce Design System compliance at every step:
 
 - Components are Instances of your Master Components, not rebuilt from scratch
 - Colors, fonts, spacing, and radii bind to Variables and Styles, not raw values
@@ -66,34 +66,26 @@ Every interaction follows the same loop: **search DS** → **create Instances** 
 
 ## What's Included
 
-### 5 Skills
+### 4 Skills
 
 | Skill | Trigger | What it does |
 | ----- | ------- | ------------ |
-| `figma-preflight` | "let's start", first Figma URL | 7 checks + loads Token Map + Component Registry |
+| `figma-preflight` | "let's start", first Figma URL | 3-step parallel check + Token Map + Component Registry |
 | `component-rules` | Any UI construction task | Library-first lookup, Auto Layout, semantic naming |
-| `figma-style-binding` | Any color, font, or spacing operation | Enforce Variable / Style binding on all visual values |
-| `figma-qa-verifier` | Auto-triggers after every Figma write | Check all nodes for raw values, report violations |
+| `figma-style-binding` | Any color, font, or spacing operation | Enforce Variable / Style binding + post-write QA verification |
 | `reference-interpreter` | Share screenshot, URL, or description | Output structured Design Brief before building |
 
 ### How They Work Together
 
-```
-"let's start"
-    |
-    v
- preflight ── verify connection, load tokens + components
-    |
-    v
- component-rules ──> figma-style-binding
- find & instantiate     bind every visual
- DS components          value to a token
-    |                       |
-    v                       v
-         figma-qa-verifier
-         verify all bindings,
-         flag any raw values
-```
+    "let's start"
+        |
+        v
+     preflight ── verify connection, load tokens + components
+        |
+        v
+     component-rules ──> figma-style-binding
+     find & instantiate     bind every visual value
+     DS components          to a token, then verify
 
 ---
 
@@ -171,10 +163,9 @@ your-project/
 └── .claude/
     ├── settings.json                  # Permissions + QA Hook
     └── skills/
-        ├── figma-preflight/           # 7 checks + Token Map + Component Registry
+        ├── figma-preflight/           # 3-step parallel check + Token Map + Component Registry
         ├── component-rules/           # Library-first, Auto Layout, naming
-        ├── figma-style-binding/       # Color / Text / Spacing binding
-        ├── figma-qa-verifier/         # Post-write verification
+        ├── figma-style-binding/       # Color / Text / Spacing binding + QA verification
         └── reference-interpreter/     # Reference → Design Brief
 ```
 
