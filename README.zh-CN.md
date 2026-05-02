@@ -35,11 +35,11 @@ cc2figma 用 4 个 Claude Code Skills 在每一步强制 Design System 合规：
 
 ## Preflight 预检系统
 
-每次设计会话开始前，自动执行 7 项检查，确保一切连接就绪：
+每次设计会话开始前，自动执行 3 步并行检查，确保一切连接就绪：
 
 ![Preflight Status](assets/preflight-status.png)
 
-MCP 连接、文件权限、已链接 Library、本地 Style、Variable、Component——全部在创建第一个节点之前验证完毕。
+MCP 连接、文件权限、Library、Style、Variable、Component——全部并行验证，在创建第一个节点之前完成。
 
 ---
 

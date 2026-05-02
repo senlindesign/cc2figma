@@ -35,11 +35,11 @@ cc2figma fixes this with 4 Claude Code Skills that enforce Design System complia
 
 ## Preflight System
 
-Before every design session, 7 automated checks ensure everything is connected:
+Before every design session, a 3-step parallel check ensures everything is connected:
 
 ![Preflight Status](assets/preflight-status.png)
 
-MCP connection, file access, connected libraries, local styles, variables, and components — all verified before a single node is created.
+MCP connection, file permissions, libraries, styles, variables, and components — all verified in parallel before a single node is created.
 
 ---
 
